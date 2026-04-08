@@ -62,18 +62,21 @@ def list_tasks():
 
 
 @app.post("/reset")
-def reset(req: ResetRequest):
-    if req.task_id not in TASKS:
-        raise HTTPException(status_code=400, detail=f"Unknown task_id: {req.task_id}")
+def reset(req: Optional[ResetRequest] = None):
+    # Fallback to defaults if body is missing
+    r = req or ResetRequest()
+    
+    if r.task_id not in TASKS:
+        raise HTTPException(status_code=400, detail=f"Unknown task_id: {r.task_id}")
 
-    env = EmailTriageEnv(task_id=req.task_id)
-    _sessions[req.session_id] = env
+    env = EmailTriageEnv(task_id=r.task_id)
+    _sessions[r.session_id] = env
     obs = env.reset()
 
     return {
         "observation": obs.model_dump(),
-        "session_id": req.session_id,
-        "task_id": req.task_id,
+        "session_id": r.session_id,
+        "task_id": r.task_id,
     }
 
 
