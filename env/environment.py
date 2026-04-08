@@ -24,6 +24,8 @@ class Email(BaseModel):
 
 class Observation(BaseModel):
     """What the agent sees at each step."""
+    class Config:
+        extra = 'ignore'
     task_id: str
     task_description: str
     current_email: Optional[Email] = None
@@ -39,6 +41,8 @@ class Observation(BaseModel):
 
 class Action(BaseModel):
     """What the agent can do."""
+    class Config:
+        extra = 'ignore'
     # Task 1 fields
     binary_label: Optional[str] = None  # "actionable" | "not_actionable"
 
@@ -56,6 +60,8 @@ class Action(BaseModel):
 
 class Reward(BaseModel):
     """Reward signal for current step."""
+    class Config:
+        extra = 'ignore'
     step_reward: float = Field(ge=0.0, le=1.0)
     cumulative_reward: float
     partial_credits: Dict[str, float] = Field(default_factory=dict)

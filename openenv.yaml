@@ -38,34 +38,29 @@ tasks:
       Graded across 4 dimensions with weighted scoring.
 
 observation_space:
-  type: structured
-  fields:
+  type: object
+  properties:
     task_id: string
     task_description: string
-    current_email:
-      id: string
-      subject: string
-      sender: string
-      body: string
-      timestamp: string
+    current_email: object
     emails_remaining: integer
     emails_processed: integer
     total_emails: integer
     last_action_feedback: string
     cumulative_score: float
     done: boolean
-    valid_labels: list[string]
-    valid_categories: list[string]
+    valid_labels: array[string]
+    valid_categories: array[string]
 
 action_space:
-  type: structured
-  fields:
-    binary_label: "actionable | not_actionable (task 1)"
-    priority_label: "urgent | high | medium | low | spam (task 2, 3)"
-    requires_reply: "boolean (task 2, 3)"
-    category: "string from valid_categories (task 3)"
-    action_summary: "string, one-sentence action description (task 3)"
-    skip: "boolean — skip email with penalty"
+  type: object
+  properties:
+    binary_label: string
+    priority_label: string
+    requires_reply: boolean
+    category: string
+    action_summary: string
+    skip: boolean
 
 reward:
   range: [0.0, 1.0]
