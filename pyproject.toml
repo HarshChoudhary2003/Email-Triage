@@ -16,11 +16,12 @@ dependencies = [
     "pydantic",
     "openai",
     "requests",
+    "openenv-core>=0.2.0",
 ]
 
-[project.optional-dependencies]
-dev = ["pytest"]
+[project.scripts]
+openenv-server = "server.app:start"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["env*"]
+include = ["env*", "server*"]

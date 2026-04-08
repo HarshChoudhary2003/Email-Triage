@@ -23,4 +23,4 @@ ENV MODEL_NAME="gpt-4o-mini"
 ENV HF_TOKEN=""
 
 # Run application
-CMD ["python", "app.py"]
+CMD ["python", "server/app.py"]

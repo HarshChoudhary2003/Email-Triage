@@ -1,0 +1,21 @@
+version = 1
+revision = 1
+
+[[package]]
+name = "email-triage-openenv"
+version = "1.0.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "fastapi" },
+    { name = "uvicorn" },
+    { name = "pydantic" },
+    { name = "openai" },
+    { name = "requests" },
+    { name = "openenv-core" },
+]
+
+[[package]]
+name = "openenv-core"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/source/o/openenv-core/openenv-core-0.2.0.tar.gz", hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000" }
