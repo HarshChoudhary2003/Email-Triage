@@ -56,6 +56,7 @@ def list_tasks():
             "difficulty": cfg["difficulty"],
             "num_emails": len(cfg["emails"]),
             "max_steps": cfg["max_steps"],
+            "success_threshold": cfg.get("success_threshold", 0.0),
         }
         for task_id, cfg in TASKS.items()
     }

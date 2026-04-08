@@ -1,5 +1,7 @@
 name: email-triage-openenv
+spec_version: 1
 version: "1.0.0"
+license: MIT
 description: >
   A real-world email triage environment where AI agents learn to classify,
   prioritize, and route emails. Simulates the daily task of managing an
@@ -63,7 +65,8 @@ action_space:
     skip: boolean
 
 reward:
-  range: [0.0, 1.0]
+  min: 0.0
+  max: 1.0
   type: dense
   description: >
     Step reward is given per email. Partial credit for adjacent labels.
