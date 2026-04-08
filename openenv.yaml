@@ -4,10 +4,8 @@ version: "1.0.0"
 license: MIT
 description: >
   A real-world email triage environment where AI agents learn to classify,
-  prioritize, and route emails. Simulates the daily task of managing an
-  inbox with 15 emails spanning urgent incidents, customer complaints,
-  spam, scheduling, and routine communications.
-
+  prioritize, and route emails.
+  
 author: "hackathon-submission"
 tags: ["email", "triage", "classification", "nlp", "real-world"]
 
@@ -17,46 +15,45 @@ tasks:
     difficulty: easy
     max_steps: 10
     success_threshold: 0.8
-    description: >
-      Classify each email as actionable or not_actionable.
-      Reward: 1.0 for correct, 0.0-0.3 for incorrect based on severity.
+    description: "Classify each email as actionable or not_actionable."
 
   - id: task_2_priority_labeling
     name: "Priority Labeling (Medium)"
     difficulty: medium
     max_steps: 15
     success_threshold: 0.7
-    description: >
-      Assign 5-class priority label (urgent/high/medium/low/spam)
-      and detect if a reply is required. Partial credit for adjacent labels.
+    description: "Assign 5-class priority label and detect if a reply is required."
 
   - id: task_3_full_triage
     name: "Full Inbox Triage (Hard)"
     difficulty: hard
     max_steps: 30
     success_threshold: 0.65
-    description: >
-      Full triage: priority label + category + reply flag + action summary.
-      Graded across 4 dimensions with weighted scoring.
+    description: "Full triage: priority label + category + reply flag + action summary."
 
 observation_space:
   type: object
-  properties:
+  fields:
     task_id: string
     task_description: string
-    current_email: object
+    current_email:
+      id: string
+      subject: string
+      sender: string
+      body: string
+      timestamp: string
     emails_remaining: integer
     emails_processed: integer
     total_emails: integer
     last_action_feedback: string
     cumulative_score: float
     done: boolean
-    valid_labels: array[string]
-    valid_categories: array[string]
+    valid_labels: list[string]
+    valid_categories: list[string]
 
 action_space:
   type: object
-  properties:
+  fields:
     binary_label: string
     priority_label: string
     requires_reply: boolean
@@ -68,10 +65,7 @@ reward:
   min: 0.0
   max: 1.0
   type: dense
-  description: >
-    Step reward is given per email. Partial credit for adjacent labels.
-    Skipping emails incurs a 0.1 reward penalty.
-    Cumulative reward is running mean across episode.
+  description: "Step reward with partial credit."
 
 api:
   reset: POST /reset

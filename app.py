@@ -35,7 +35,7 @@ class StepRequest(BaseModel):
 @app.get("/")
 def root():
     return {
-        "name": "Email Triage OpenEnv",
+        "name": "email-triage-openenv",
         "version": "1.0.0",
         "tasks": list(TASKS.keys()),
         "endpoints": ["/reset", "/step", "/state", "/health", "/tasks"],
