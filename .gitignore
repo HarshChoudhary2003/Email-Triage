@@ -5,7 +5,7 @@ __pycache__/
 .venv
 env/.venv
 venv/
-ENV/
+# ENV/ (Removed because it blocks 'env/' on case-insensitive systems)
 .idea/
 .vscode/
 *.log
