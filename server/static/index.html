@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Triage AI Dashboard</title>
+    <meta name="description" content="A premium AI dashboard for managing email triage tasks in the Email Triage OpenEnv.">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header class="glass">
+            <div class="logo">
+                <span class="logo-icon">📧</span>
+                <h1>Email Triage <span class="accent">AI</span></h1>
+            </div>
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="label">Status:</span>
+                    <span id="connection-status" class="value pulse">Connecting...</span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Session:</span>
+                    <span id="session-id" class="value text-accent">N/A</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <aside class="sidebar glass">
+                <section class="tasks-section">
+                    <h3>Available Tasks</h3>
+                    <div id="tasks-list" class="tasks-list">
+                        <!-- Tasks will be loaded here -->
+                        <div class="loading-shimmer"></div>
+                        <div class="loading-shimmer"></div>
+                    </div>
+                </section>
+
+                <section class="stats-section">
+                    <h3>Performance</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-label">Steps</span>
+                            <span id="stat-steps" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Score</span>
+                            <span id="stat-score" class="stat-value">0.0</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="control-section">
+                    <button id="reset-btn" class="btn primary-btn glass-btn">
+                        <span>Reset Environment</span>
+                    </button>
+                </section>
+            </aside>
+
+            <section class="content-area">
+                <div id="observation-container" class="obs-card glass">
+                    <div class="obs-header">
+                        <h2>Current Observation</h2>
+                        <span id="task-name-display" class="badge">No Task Selected</span>
+                    </div>
+                    
+                    <div id="obs-content" class="obs-body">
+                        <div class="welcome-message">
+                            <h2>Welcome to Email Triage AI</h2>
+                            <p>Select a task from the sidebar to begin. Your AI agent will be tested on its ability to classify and handle incoming emails correctly.</p>
+                            <div class="hero-icons">
+                                📬 🤖 ⚖️
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="action-panel" class="action-panel" style="display: none;">
+                        <h3>Take Action</h3>
+                        <div id="action-controls" class="action-controls">
+                            <!-- Action buttons will be generated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="logs-container glass">
+                    <div class="logs-header">
+                        <h3>Action History</h3>
+                        <button id="clear-logs" class="text-btn">Clear</button>
+                    </div>
+                    <div id="logs-list" class="logs-list">
+                        <div class="empty-log">Log is empty.</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="glass">
+            <p>&copy; 2026 Email Triage OpenEnv • <a href="https://github.com/techharsh/email-triage-openenv" target="_blank">View Source</a></p>
+        </footer>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification" class="notification"></div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

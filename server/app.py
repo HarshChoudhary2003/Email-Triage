@@ -3,16 +3,18 @@ FastAPI server exposing the Email Triage OpenEnv environment.
 Deployed on Hugging Face Spaces.
 """
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 import uvicorn
+import os
 
 import sys
-import os
 # Ensure the parent directory is in sys.path so 'env' module is found
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 
 from env import EmailTriageEnv, Action
 from env.tasks import TASKS
@@ -22,6 +24,13 @@ app = FastAPI(
     description="An OpenEnv-compliant environment for training AI agents on email triage tasks.",
     version="1.0.0",
 )
+
+# Mount static files
+static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+if not os.path.exists(static_dir):
+    os.makedirs(static_dir)
+
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # In-memory session store (single-session for HF Spaces demo)
 _sessions: Dict[str, EmailTriageEnv] = {}
@@ -39,11 +48,14 @@ class StepRequest(BaseModel):
 
 @app.get("/")
 def root():
+    index_path = os.path.join(static_dir, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
     return {
         "name": "email-triage-openenv",
         "version": "1.0.0",
         "tasks": list(TASKS.keys()),
-        "endpoints": ["/reset", "/step", "/state", "/health", "/tasks"],
+        "endpoints": ["/reset", "/step", "/state", "/health", "/tasks", "/ui"],
     }
 
 
