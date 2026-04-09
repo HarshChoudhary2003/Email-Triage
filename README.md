@@ -87,35 +87,16 @@ cd email-triage-openenv
 pip install -r requirements.txt
 
 # Start the API server
-python app.py
+python server/app.py
 ```
 
-### Docker
+Now open `http://localhost:7860` in your browser to access the **Email Triage AI Dashboard**.
 
-```bash
-docker build -t email-triage-openenv .
-docker run -p 7860:7860 \
-  -e API_BASE_URL=https://api.openai.com/v1 \
-  -e MODEL_NAME=gpt-4o-mini \
-  -e HF_TOKEN=your_key \
-  email-triage-openenv
-```
-
-### Run Baseline Inference
-
-```bash
-export API_BASE_URL=https://api.openai.com/v1
-export MODEL_NAME=gpt-4o-mini
-export HF_TOKEN=your_openai_key
-
-python inference.py
-```
-
-## API Endpoints
+### API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/` | Environment info |
+| GET | `/` | **Web UI** (or environment info if UI unavailable) |
 | GET | `/health` | Health check |
 | GET | `/tasks` | List available tasks |
 | POST | `/reset` | Reset environment for a task |
@@ -123,38 +104,13 @@ python inference.py
 | GET | `/state` | Current environment state |
 | GET | `/score` | Final score for session |
 
-### Example: Run via API
+## Dashboards & Visualization
 
-```python
-import requests
-
-BASE = "http://localhost:7860"
-
-# Start a new episode
-obs = requests.post(f"{BASE}/reset", json={
-    "task_id": "task_1_binary_triage",
-    "session_id": "my_agent"
-}).json()
-
-# Step through emails
-while not obs["observation"]["done"]:
-    action = {"binary_label": "actionable"}  # Your agent's decision
-    result = requests.post(f"{BASE}/step", json={
-        "session_id": "my_agent",
-        "action": action
-    }).json()
-    obs = result
-    print(f"Reward: {result['reward']['step_reward']}")
-```
-
-## Baseline Scores
-
-| Task | GPT-4o-mini Score |
-|------|------------------|
-| task_1_binary_triage (Easy) | ~0.85 |
-| task_2_priority_labeling (Medium) | ~0.72 |
-| task_3_full_triage (Hard) | ~0.61 |
-| **Overall Average** | **~0.73** |
+The environment includes a premium, built-in **Web UI** built with vanilla JavaScript and CSS (glassmorphism design). It allows for:
+- Manual task execution for debugging.
+- Visualizing email content and metadata.
+- Real-time logging of actions and rewards.
+- Performance tracking (steps and scores).
 
 ## Project Structure
 
@@ -163,14 +119,19 @@ email-triage-openenv/
 ├── openenv.yaml          # OpenEnv spec metadata
 ├── Dockerfile            # Container definition
 ├── README.md             # This file
-├── inference.py          # Baseline inference script (root-level, required)
-├── app.py                # FastAPI server
-├── requirements.txt      # Python dependencies
+├── inference.py          # Baseline inference script
+├── requirements.txt      # Dependencies
+├── server/
+│   ├── app.py            # FastAPI server
+│   └── static/           # Web UI Assets
+│       ├── index.html    # Premium Dashboard
+│       ├── style.css     # Glassmorphism styling
+│       └── script.js     # Dashboard logic
 └── env/
     ├── __init__.py
-    ├── environment.py    # Core OpenEnv logic (step/reset/state)
-    ├── tasks.py          # Task definitions + graders
-    └── data.py           # Synthetic email dataset (15 emails)
+    ├── environment.py    # Core logic
+    ├── tasks.py          # Tasks + Graders
+    └── data.py           # Email dataset
 ```
 
 ## OpenEnv Compliance
