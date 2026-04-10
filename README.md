@@ -181,8 +181,6 @@ email-triage-openenv/
 - ✅ `state()` → current internal state
 - ✅ `openenv.yaml` with full metadata
 - ✅ 3 tasks with difficulty progression (easy → medium → hard)
-- ✅ Reward in [0.0, 1.0] range
-- ✅ Dense reward (partial credit, not just binary)
 - ✅ Baseline `inference.py` with `[START]`/`[STEP]`/`[END]` logging
 - ✅ Dockerfile works with `docker build && docker run`
 - ✅ Deploys to Hugging Face Spaces on port 7860
