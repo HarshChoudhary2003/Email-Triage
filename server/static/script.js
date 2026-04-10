@@ -55,8 +55,16 @@ const UI = {
     },
 
     renderObservation(obs) {
+        // Update Progress
+        const processed = obs.emails_processed || 0;
+        const total = obs.total_emails || 1;
+        const percent = (processed / total) * 100;
+        document.getElementById('progress-text').textContent = `${processed}/${total} Emails`;
+        document.getElementById('progress-fill').style.width = `${percent}%`;
+
+        // Update Tabs/Content
         if (!obs || !obs.current_email) {
-            this.obsContent.innerHTML = `
+            document.getElementById('tab-email').innerHTML = `
                 <div class="welcome-message">
                     <h2>Task Completed!</h2>
                     <p>You have triaged all emails in this set.</p>
@@ -68,7 +76,7 @@ const UI = {
         }
 
         const email = obs.current_email;
-        this.obsContent.innerHTML = `
+        document.getElementById('tab-email').innerHTML = `
             <div class="email-view">
                 <div class="email-field">
                     <span class="label">From</span>
@@ -82,70 +90,103 @@ const UI = {
                     <span class="label">Content</span>
                     <div class="value email-body">${email.body}</div>
                 </div>
-                <div class="email-field">
-                    <span class="label">Metadata</span>
-                    <div class="value" style="font-size:0.8rem; color:var(--text-muted)">
-                        ID: ${email.id} | Timestamp: ${email.timestamp || 'N/A'}
-                    </div>
-                </div>
             </div>
         `;
 
-        this.renderActions(obs.available_actions);
+        // Metadata view
+        document.getElementById('metadata-content').innerHTML = `
+            <div class="email-field"><span class="label">ID</span><div class="value">${email.id}</div></div>
+            <div class="email-field"><span class="label">Timestamp</span><div class="value">${email.timestamp}</div></div>
+            <div class="email-field"><span class="label">Remaining</span><div class="value">${obs.emails_remaining}</div></div>
+            <div class="email-field"><span class="label">History</span><div class="value">${obs.last_action_feedback || 'None'}</div></div>
+        `;
+
+        // JSON View
+        document.getElementById('json-inspector').textContent = JSON.stringify(obs, null, 2);
+
+        this.renderActions(obs);
     },
 
-    renderActions(actions) {
+    renderActions(obs) {
         this.actionControls.innerHTML = '';
         this.actionPanel.style.display = 'block';
 
-        if (!actions || actions.length === 0) {
-            this.actionControls.innerHTML = '<p style="color:var(--text-muted)">No actions available.</p>';
-            return;
+        const taskId = obs.task_id;
+        
+        if (taskId.includes('task_1')) {
+            this.createActionBtn('Actionable', { binary_label: 'actionable' }, 'actionable');
+            this.createActionBtn('Not Actionable', { binary_label: 'not_actionable' }, 'not_actionable');
+        } else if (taskId.includes('task_2')) {
+            ['urgent', 'high', 'medium', 'low', 'spam'].forEach(p => {
+                this.createActionBtn(p, { priority_label: p, requires_reply: true }, p);
+            });
+        } else if (taskId.includes('task_3')) {
+            // Task 3 is complex, we'll provide a simplified 'Action' button or more buttons
+            ['urgent', 'high', 'medium', 'low', 'spam'].forEach(p => {
+                this.createActionBtn(p, { 
+                    priority_label: p, 
+                    requires_reply: p === 'urgent' || p === 'high',
+                    category: 'general',
+                    action_summary: `Triaged as ${p}`
+                }, p);
+            });
         }
 
-        actions.forEach(actStr => {
-            const btn = document.createElement('button');
-            btn.className = 'action-btn';
-            btn.textContent = actStr;
-            btn.onclick = () => this.handleAction(actStr);
-            this.actionControls.appendChild(btn);
-        });
+        // Add Skip Button
+        const skipBtn = document.createElement('button');
+        skipBtn.className = 'action-btn skip-btn';
+        skipBtn.textContent = 'Skip Email (Penalty)';
+        skipBtn.onclick = () => this.handleAction({ skip: true });
+        this.actionControls.appendChild(skipBtn);
     },
 
-    async handleAction(actionStr) {
+    createActionBtn(label, actionObj, styleType) {
+        const btn = document.createElement('button');
+        btn.className = 'action-btn';
+        if (styleType) btn.dataset.type = styleType;
+        if (styleType) btn.dataset.action = styleType;
+        btn.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+        btn.onclick = () => this.handleAction(actionObj);
+        this.actionControls.appendChild(btn);
+    },
+
+    async handleAction(actionObj) {
         try {
-            this.addLog(`Performing action: <b>${actionStr}</b>`, 'info');
-            
-            // Format action for API
-            let actionObj = { type: actionStr };
-            
-            // Heuristic for OpenEnv Action parsing if needed, but the current app.py 
-            // expects a Dict[str, Any] which Action(**req.action) handles.
-            // In our env, action types are like "Archive", "Label: Priority", etc.
+            this.addLog(`Performing action...`, 'info');
             
             const result = await API.step(actionObj);
             
             if (result.error) throw new Error(result.error);
 
-            this.updateStats(result.observation.step_count, result.reward.total);
+            this.updateStats(result.observation.emails_processed, result.reward.cumulative_reward);
             this.renderObservation(result.observation);
             
-            if (result.reward.last > 0) {
-                this.addLog(`Action successful! Reward: +${result.reward.last.toFixed(2)}`, 'success');
-            } else if (result.reward.last < 0) {
-                this.addLog(`Incorrect action. Penalty: ${result.reward.last.toFixed(2)}`, 'error');
+            const stepReward = result.reward.step_reward;
+            if (stepReward >= 0.8) {
+                this.addLog(`Excellent! Reward: +${stepReward}`, 'success');
+                this.showNotification('Great Choice! ✨');
+                this.triggerSparkle();
+            } else if (stepReward > 0.4) {
+                this.addLog(`Acceptable. Reward: +${stepReward}`, 'info');
             } else {
-                this.addLog(`Action recorded.`, 'info');
+                this.addLog(`Incorrect. Reward: ${stepReward}`, 'error');
+                this.showNotification('Suboptimal Action', 3000);
             }
 
             if (result.done) {
-                this.addLog(`<b>Task Finished!</b> Final Score: ${result.reward.total.toFixed(2)}`, 'success');
-                this.showNotification('Task Completed!');
+                this.addLog(`<b>Task Finished!</b> Final Score: ${result.reward.cumulative_reward.toFixed(2)}`, 'success');
+                this.showNotification('Task Completed! 🏆');
             }
         } catch (err) {
             this.addLog(`Error: ${err.message}`, 'error');
             this.showNotification('Action failed', 4000);
         }
+    },
+
+    triggerSparkle() {
+        const obs = document.getElementById('observation-container');
+        obs.style.boxShadow = '0 0 40px var(--success)';
+        setTimeout(() => obs.style.boxShadow = 'var(--shadow)', 1000);
     },
 
     updateStats(steps, score) {
@@ -154,6 +195,16 @@ const UI = {
     },
 
     async init() {
+        // Tab Handling
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+            };
+        });
+
         try {
             const tasks = await API.listTasks();
             this.tasksList.innerHTML = '';

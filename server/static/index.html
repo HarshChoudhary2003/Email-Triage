@@ -62,26 +62,55 @@
             </aside>
 
             <section class="content-area">
+                <div class="progress-wrap glass">
+                    <div class="progress-header">
+                        <span>Task Progress</span>
+                        <span id="progress-text">0/0 Emails</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div id="progress-fill" class="progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
                 <div id="observation-container" class="obs-card glass">
                     <div class="obs-header">
-                        <h2>Current Observation</h2>
-                        <span id="task-name-display" class="badge">No Task Selected</span>
+                        <div class="obs-title">
+                            <h2>Current Observation</h2>
+                            <span id="task-name-display" class="badge">No Task Selected</span>
+                        </div>
+                        <div class="obs-tabs">
+                            <button class="tab-btn active" data-tab="email">Email</button>
+                            <button class="tab-btn" data-tab="metadata">Metadata</button>
+                            <button class="tab-btn" data-tab="json">Raw JSON</button>
+                        </div>
                     </div>
                     
                     <div id="obs-content" class="obs-body">
-                        <div class="welcome-message">
-                            <h2>Welcome to Email Triage AI</h2>
-                            <p>Select a task from the sidebar to begin. Your AI agent will be tested on its ability to classify and handle incoming emails correctly.</p>
-                            <div class="hero-icons">
-                                📬 🤖 ⚖️
+                        <!-- Content will be swapped by tabs -->
+                        <div id="tab-email" class="tab-pane active">
+                            <div class="welcome-message">
+                                <h2>Welcome to Email Triage AI</h2>
+                                <p>Select a task from the sidebar to begin. Your AI agent will be tested on its ability to classify and handle incoming emails correctly.</p>
+                                <div class="hero-icons">📬 🤖 ⚖️</div>
                             </div>
+                        </div>
+                        <div id="tab-metadata" class="tab-pane">
+                            <div class="metadata-grid" id="metadata-content">
+                                <!-- Metadata items -->
+                            </div>
+                        </div>
+                        <div id="tab-json" class="tab-pane">
+                            <pre id="json-inspector" class="json-view">{}</pre>
                         </div>
                     </div>
 
                     <div id="action-panel" class="action-panel" style="display: none;">
-                        <h3>Take Action</h3>
+                        <div class="action-panel-header">
+                            <h3>Take Action</h3>
+                            <span class="action-hint">Choose the most appropriate triage action.</span>
+                        </div>
                         <div id="action-controls" class="action-controls">
-                            <!-- Action buttons will be generated here -->
+                            <!-- Action buttons/dropdowns will be generated here -->
                         </div>
                     </div>
                 </div>
