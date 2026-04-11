@@ -23,8 +23,7 @@ MODEL_NAME = os.environ.get("MODEL_NAME", "gpt-4o-mini")
 HF_TOKEN = os.environ.get("HF_TOKEN", os.environ.get("OPENAI_API_KEY", ""))
 
 if not HF_TOKEN:
-    print("ERROR: HF_TOKEN or OPENAI_API_KEY not set.", file=sys.stderr)
-    sys.exit(1)
+    print("[WARN] HF_TOKEN or OPENAI_API_KEY not set — proceeding with empty token.", file=sys.stderr)
 
 client = OpenAI(api_key=HF_TOKEN, base_url=API_BASE_URL)
 
@@ -102,6 +101,18 @@ PROMPT_BUILDERS = {
 }
 
 
+def _fallback_action() -> dict:
+    """Safe default action used when LLM call fails."""
+    return {
+        "binary_label": "not_actionable",
+        "priority_label": "medium",
+        "requires_reply": False,
+        "category": "admin",
+        "action_summary": "Review and handle as appropriate.",
+        "skip": False,
+    }
+
+
 def call_llm(prompt: str, task_id: str) -> dict:
     """Call LLM and parse JSON response."""
     try:
@@ -123,17 +134,10 @@ def call_llm(prompt: str, task_id: str) -> dict:
         return json.loads(content.strip())
     except json.JSONDecodeError as e:
         print(f"  [WARN] JSON parse error: {e}", file=sys.stderr)
-        # Fallback defaults
-        return {
-            "binary_label": "not_actionable",
-            "priority_label": "medium",
-            "requires_reply": False,
-            "category": "admin",
-            "action_summary": "Review and handle as appropriate.",
-        }
+        return _fallback_action()
     except Exception as e:
         print(f"  [ERROR] LLM call failed: {e}", file=sys.stderr)
-        return {}
+        return _fallback_action()
 
 
 def run_task(task_id: str) -> float:
@@ -164,7 +168,9 @@ def run_task(task_id: str) -> float:
 
         prompt = prompt_builder(obs_dict)
         action_dict = call_llm(prompt, task_id)
-        action = Action(**{k: action_dict.get(k) for k in Action.model_fields})
+        # Only pass fields that the model returned; let Action defaults handle the rest
+        valid_fields = {k: v for k, v in action_dict.items() if k in Action.model_fields and v is not None}
+        action = Action(**valid_fields)
 
         obs, reward, done, info = env.step(action)
         obs_dict = obs.model_dump()
