@@ -20,7 +20,8 @@ dependencies = [
 ]
 
 [project.scripts]
-openenv-server = "server.app:start"
+server = "server.app:main"
+openenv-server = "server.app:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
