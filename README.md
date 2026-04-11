@@ -1,3 +1,12 @@
+---
+title: Email Triage OpenEnv
+emoji: 📧
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 <div align="center">
   <img src="https://raw.githubusercontent.com/HarshChoudhary2003/Email-Triage/main/server/static/favicon.ico" alt="Logo" width="80" height="80">
 
