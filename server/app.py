@@ -61,7 +61,30 @@ def root():
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "healthy"}
+
+
+@app.get("/metadata")
+def metadata():
+    return {
+        "name": "email-triage-openenv",
+        "description": (
+            "A real-world email triage environment where AI agents learn to classify, "
+            "prioritize, and route emails through step()/reset()/state() API."
+        ),
+        "version": "1.0.0",
+        "tasks": list(TASKS.keys()),
+    }
+
+
+@app.get("/schema")
+def schema():
+    from env.environment import Action, Observation, EnvironmentState
+    return {
+        "action": Action.model_json_schema(),
+        "observation": Observation.model_json_schema(),
+        "state": EnvironmentState.model_json_schema(),
+    }
 
 
 @app.get("/tasks")
