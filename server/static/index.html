@@ -3,137 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Triage AI Dashboard</title>
-    <meta name="description" content="A premium AI dashboard for managing email triage tasks in the Email Triage OpenEnv.">
-    <link rel="stylesheet" href="/static/style.css">
+    <title>Email Triage AI — OpenEnv Dashboard</title>
+    <meta name="description" content="Interactive AI dashboard for the Email Triage OpenEnv environment. Train and evaluate agents on real-world email classification tasks.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="app-container">
-        <header class="glass">
-            <div class="logo">
-                <span class="logo-icon">📧</span>
-                <h1>Email Triage <span class="accent">AI</span></h1>
-            </div>
-            <div class="status-bar">
-                <div class="status-item">
-                    <span class="label">Status:</span>
-                    <span id="connection-status" class="value pulse">Connecting...</span>
+    <!-- Animated BG Orbs -->
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+
+    <div class="app-shell">
+
+        <!-- ── HEADER ────────────────────────────────────────────── -->
+        <header class="app-header glass-panel">
+            <div class="header-brand">
+                <div class="brand-icon">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                        <rect width="28" height="28" rx="8" fill="url(#brandGrad)"/>
+                        <path d="M5 9l9 6 9-6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                        <rect x="5" y="8" width="18" height="13" rx="2" stroke="white" stroke-width="1.5" fill="none"/>
+                        <defs>
+                            <linearGradient id="brandGrad" x1="0" y1="0" x2="28" y2="28">
+                                <stop stop-color="#7c3aed"/>
+                                <stop offset="1" stop-color="#06b6d4"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
                 </div>
-                <div class="status-item">
-                    <span class="label">Session:</span>
-                    <span id="session-id" class="value text-accent">N/A</span>
+                <div>
+                    <h1 class="brand-title">Email Triage <span class="gradient-text">AI</span></h1>
+                    <p class="brand-sub">OpenEnv Evaluation Dashboard</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <div class="status-pill" id="conn-pill">
+                    <span class="status-dot" id="status-dot"></span>
+                    <span id="conn-label">Connecting…</span>
+                </div>
+                <div class="header-meta">
+                    <span class="meta-label">Session</span>
+                    <span class="meta-value mono" id="session-id">—</span>
+                </div>
+                <div class="header-meta">
+                    <span class="meta-label">Task</span>
+                    <span class="meta-value" id="header-task">None</span>
                 </div>
             </div>
         </header>
 
-        <main>
-            <aside class="sidebar glass">
-                <section class="tasks-section">
-                    <h3>Available Tasks</h3>
+        <!-- ── MAIN GRID ─────────────────────────────────────────── -->
+        <div class="main-grid">
+
+            <!-- ── SIDEBAR ───────────────────────────── -->
+            <aside class="sidebar">
+
+                <!-- Score Ring -->
+                <div class="score-ring-card glass-panel">
+                    <p class="score-ring-label">Cumulative Score</p>
+                    <div class="score-ring-wrap">
+                        <svg class="score-svg" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="50" class="ring-bg"/>
+                            <circle cx="60" cy="60" r="50" class="ring-fill" id="score-ring-fill"
+                                stroke-dasharray="314.16"
+                                stroke-dashoffset="314.16"/>
+                        </svg>
+                        <div class="score-center">
+                            <span class="score-number" id="score-number">0.00</span>
+                            <span class="score-pct" id="score-pct">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stat Cards -->
+                <div class="stat-bar glass-panel">
+                    <div class="stat-item">
+                        <span class="stat-ico">📨</span>
+                        <div>
+                            <p class="stat-val" id="stat-processed">0</p>
+                            <p class="stat-lbl">Processed</p>
+                        </div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-ico">📋</span>
+                        <div>
+                            <p class="stat-val" id="stat-remaining">—</p>
+                            <p class="stat-lbl">Remaining</p>
+                        </div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-ico">🎯</span>
+                        <div>
+                            <p class="stat-val" id="stat-steps">0</p>
+                            <p class="stat-lbl">Steps</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tasks -->
+                <div class="sidebar-section glass-panel">
+                    <div class="section-head">
+                        <h2 class="section-title">Tasks</h2>
+                        <span class="section-badge" id="task-count">—</span>
+                    </div>
                     <div id="tasks-list" class="tasks-list">
-                        <!-- Tasks will be loaded here -->
-                        <div class="loading-shimmer"></div>
-                        <div class="loading-shimmer"></div>
+                        <div class="shimmer"></div>
+                        <div class="shimmer"></div>
+                        <div class="shimmer"></div>
                     </div>
-                </section>
+                </div>
 
-                <section class="stats-section">
-                    <h3>Performance</h3>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <span class="stat-label">Steps</span>
-                            <span id="stat-steps" class="stat-value">0</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Score</span>
-                            <span id="stat-score" class="stat-value">0.0</span>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="control-section">
-                    <button id="reset-btn" class="btn primary-btn glass-btn">
-                        <span>Reset Environment</span>
+                <!-- Controls -->
+                <div class="sidebar-controls">
+                    <button id="btn-reset" class="btn btn-primary" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                        Reset Environment
                     </button>
-                </section>
+                    <button id="btn-auto" class="btn btn-ghost" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Auto-Triage Demo
+                    </button>
+                </div>
             </aside>
 
-            <section class="content-area">
-                <div class="progress-wrap glass">
-                    <div class="progress-header">
-                        <span>Task Progress</span>
-                        <span id="progress-text">0/0 Emails</span>
+            <!-- ── CONTENT AREA ───────────────────────── -->
+            <section class="content-col">
+
+                <!-- Progress -->
+                <div class="progress-card glass-panel">
+                    <div class="progress-meta">
+                        <span id="progress-label">Select a task to begin</span>
+                        <span id="progress-text" class="mono">0 / 0</span>
                     </div>
-                    <div class="progress-bar-bg">
-                        <div id="progress-fill" class="progress-bar-fill" style="width: 0%"></div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
                     </div>
+                    <div class="reward-history" id="reward-bars"></div>
                 </div>
 
-                <div id="observation-container" class="obs-card glass">
-                    <div class="obs-header">
-                        <div class="obs-title">
-                            <h2>Current Observation</h2>
-                            <span id="task-name-display" class="badge">No Task Selected</span>
+                <!-- Email Card -->
+                <div class="email-card glass-panel" id="email-card">
+                    <div class="email-card-topbar">
+                        <div class="email-card-title">
+                            <h2 id="email-subject">Select a task →</h2>
+                            <div class="email-tags" id="email-tags"></div>
                         </div>
-                        <div class="obs-tabs">
-                            <button class="tab-btn active" data-tab="email">Email</button>
-                            <button class="tab-btn" data-tab="metadata">Metadata</button>
-                            <button class="tab-btn" data-tab="json">Raw JSON</button>
-                        </div>
-                    </div>
-                    
-                    <div id="obs-content" class="obs-body">
-                        <!-- Content will be swapped by tabs -->
-                        <div id="tab-email" class="tab-pane active">
-                            <div class="welcome-message">
-                                <h2>Welcome to Email Triage AI</h2>
-                                <p>Select a task from the sidebar to begin. Your AI agent will be tested on its ability to classify and handle incoming emails correctly.</p>
-                                <div class="hero-icons">📬 🤖 ⚖️</div>
-                            </div>
-                        </div>
-                        <div id="tab-metadata" class="tab-pane">
-                            <div class="metadata-grid" id="metadata-content">
-                                <!-- Metadata items -->
-                            </div>
-                        </div>
-                        <div id="tab-json" class="tab-pane">
-                            <pre id="json-inspector" class="json-view">{}</pre>
+                        <div class="tab-group">
+                            <button class="tab active" data-tab="view-email">Email</button>
+                            <button class="tab" data-tab="view-meta">Metadata</button>
+                            <button class="tab" data-tab="view-json">JSON</button>
                         </div>
                     </div>
 
-                    <div id="action-panel" class="action-panel" style="display: none;">
+                    <div class="tab-body">
+                        <!-- Email View -->
+                        <div id="view-email" class="tab-pane active">
+                            <div class="welcome-state" id="welcome-state">
+                                <div class="welcome-icon">📬</div>
+                                <h3>Email Triage AI Environment</h3>
+                                <p>Choose a task from the sidebar, then click Reset to start triaging emails with the AI agent.</p>
+                                <div class="feature-chips">
+                                    <span class="chip">3 Difficulty Levels</span>
+                                    <span class="chip">Real-world Emails</span>
+                                    <span class="chip">Reward Grading</span>
+                                </div>
+                            </div>
+                            <div class="email-content hidden" id="email-content">
+                                <div class="email-row">
+                                    <span class="email-row-label">From</span>
+                                    <span class="email-row-val" id="email-from"></span>
+                                </div>
+                                <div class="email-row">
+                                    <span class="email-row-label">Time</span>
+                                    <span class="email-row-val mono" id="email-time"></span>
+                                </div>
+                                <div class="email-divider"></div>
+                                <div class="email-body-text" id="email-body"></div>
+                                <div class="feedback-banner hidden" id="feedback-banner"></div>
+                            </div>
+                            <div class="done-state hidden" id="done-state">
+                                <div class="done-icon">🏆</div>
+                                <h3>Task Complete!</h3>
+                                <p id="done-score-text">All emails have been triaged.</p>
+                                <button class="btn btn-primary" onclick="UI.resetCurrent()">Run Again</button>
+                            </div>
+                        </div>
+
+                        <!-- Metadata View -->
+                        <div id="view-meta" class="tab-pane">
+                            <div class="meta-grid" id="meta-grid"></div>
+                        </div>
+
+                        <!-- JSON View -->
+                        <div id="view-json" class="tab-pane">
+                            <pre class="json-view" id="json-view">{}</pre>
+                        </div>
+                    </div>
+
+                    <!-- Action Panel -->
+                    <div class="action-panel" id="action-panel" style="display:none">
                         <div class="action-panel-header">
-                            <h3>Take Action</h3>
-                            <span class="action-hint">Choose the most appropriate triage action.</span>
+                            <h3 id="action-title">Choose Action</h3>
+                            <span class="action-hint" id="action-hint"></span>
                         </div>
-                        <div id="action-controls" class="action-controls">
-                            <!-- Action buttons/dropdowns will be generated here -->
-                        </div>
+                        <div class="action-grid" id="action-grid"></div>
                     </div>
                 </div>
 
-                <div class="logs-container glass">
-                    <div class="logs-header">
-                        <h3>Action History</h3>
-                        <button id="clear-logs" class="text-btn">Clear</button>
-                    </div>
-                    <div id="logs-list" class="logs-list">
-                        <div class="empty-log">Log is empty.</div>
-                    </div>
-                </div>
             </section>
-        </main>
 
-        <footer class="glass">
-            <p>&copy; 2026 Email Triage OpenEnv • <a href="https://github.com/techharsh/email-triage-openenv" target="_blank">View Source</a></p>
-        </footer>
-    </div>
+            <!-- ── ACTIVITY LOG ────────────────────────── -->
+            <aside class="log-panel">
+                <div class="log-header glass-panel">
+                    <h2 class="section-title">Activity Log</h2>
+                    <button class="btn-icon" id="btn-clear-log" title="Clear log">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                    </button>
+                </div>
+                <div class="log-list glass-panel" id="log-list">
+                    <div class="log-empty">No activity yet.</div>
+                </div>
+            </aside>
 
-    <!-- Notification Container -->
-    <div id="notification" class="notification"></div>
+        </div><!-- end main-grid -->
+    </div><!-- end app-shell -->
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
     <script src="/static/script.js"></script>
 </body>
