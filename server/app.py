@@ -87,6 +87,33 @@ def schema():
     }
 
 
+@app.get("/mcp")
+def mcp():
+    """
+    Model Context Protocol (MCP) compatibility endpoint.
+    Exposes OpenEnv environment actions as an MCP server.
+    """
+    from env.environment import Action
+    return {
+        "jsonrpc": "2.0",
+        "methods": {
+            "get_status": "Ready",
+            "list_tools": [
+                {
+                    "name": "triage_email",
+                    "description": "Triage the current email based on context.",
+                    "input_schema": Action.model_json_schema()
+                }
+            ],
+            "capabilities": {
+                "resources": {},
+                "tools": {"listChanged": True},
+                "prompts": {}
+            }
+        }
+    }
+
+
 @app.get("/tasks")
 def list_tasks():
     return {

@@ -46,9 +46,14 @@ Body: {email.get('body', '')}
 Task: {obs_dict.get('task_description', '')}
 
 Respond with a JSON object containing:
+- "reasoning": A brief chain of thought analyzing the email before deciding.
 - "binary_label": either "actionable" or "not_actionable"
 
-Only output valid JSON. Example: {{"binary_label": "actionable"}}"""
+Only output valid JSON. Example:
+{{
+  "reasoning": "The email describes a server outage which is critical.",
+  "binary_label": "actionable"
+}}"""
 
 
 def build_prompt_task2(obs_dict: dict) -> str:
@@ -65,10 +70,16 @@ Task: {obs_dict.get('task_description', '')}
 Valid priority labels: urgent, high, medium, low, spam
 
 Respond with a JSON object:
+- "reasoning": "Think step-by-step about why this deserves a certain priority."
 - "priority_label": one of [urgent, high, medium, low, spam]
 - "requires_reply": true or false
 
-Only output valid JSON. Example: {{"priority_label": "high", "requires_reply": true}}"""
+Only output valid JSON. Example:
+{{
+  "reasoning": "The CEO is asking for Q3 numbers, which requires a fast response.",
+  "priority_label": "high",
+  "requires_reply": true
+}}"""
 
 
 def build_prompt_task3(obs_dict: dict) -> str:
@@ -87,6 +98,7 @@ Valid categories: incident, security, customer_complaint, approval, scheduling, 
 
 Respond ONLY with a JSON object:
 {{
+  "reasoning": "<step-by-step analysis of urgency, category, and action required>",
   "priority_label": "<label>",
   "category": "<category>",
   "requires_reply": <true|false>,
@@ -131,7 +143,13 @@ def call_llm(prompt: str, task_id: str) -> dict:
             content = content.split("```")[1]
             if content.startswith("json"):
                 content = content[4:]
-        return json.loads(content.strip())
+        parsed = json.loads(content.strip())
+        
+        # Display agent's chain of thought (stderr ensures we don't break stdout parsing)
+        if "reasoning" in parsed:
+            print(f"  [Agent Thought] {parsed['reasoning']}", file=sys.stderr)
+            
+        return parsed
     except json.JSONDecodeError as e:
         print(f"  [WARN] JSON parse error: {e}", file=sys.stderr)
         return _fallback_action()
