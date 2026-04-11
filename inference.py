@@ -150,14 +150,11 @@ def run_task(task_id: str) -> float:
     task_info = TASKS[task_id]
 
     # ── [START] log ──────────────────────────────────────────────────────────
-    print(json.dumps({
-        "event": "START",
-        "task_id": task_id,
-        "task_name": task_info["name"],
-        "difficulty": task_info["difficulty"],
-        "total_emails": obs_dict["total_emails"],
-        "model": MODEL_NAME,
-    }))
+    print(
+        f"[START] task={task_id} model={MODEL_NAME}"
+        f" difficulty={task_info['difficulty']} total_emails={obs_dict['total_emails']}",
+        flush=True,
+    )
 
     step_num = 0
     all_rewards = []
@@ -178,17 +175,14 @@ def run_task(task_id: str) -> float:
         all_rewards.append(reward_dict["step_reward"])
 
         # ── [STEP] log ───────────────────────────────────────────────────────
-        print(json.dumps({
-            "event": "STEP",
-            "task_id": task_id,
-            "step": step_num,
-            "email_id": info.get("email_id"),
-            "action": action_dict,
-            "step_reward": reward_dict["step_reward"],
-            "cumulative_reward": reward_dict["cumulative_reward"],
-            "feedback": reward_dict["feedback"],
-            "done": done,
-        }))
+        print(
+            f"[STEP] step={step_num}"
+            f" reward={reward_dict['step_reward']}"
+            f" cumulative_reward={reward_dict['cumulative_reward']}"
+            f" done={done}"
+            f" email_id={info.get('email_id')}",
+            flush=True,
+        )
 
         step_num += 1
         if done:
@@ -197,15 +191,12 @@ def run_task(task_id: str) -> float:
     final_score = env.get_final_score()
 
     # ── [END] log ────────────────────────────────────────────────────────────
-    print(json.dumps({
-        "event": "END",
-        "task_id": task_id,
-        "task_name": task_info["name"],
-        "difficulty": task_info["difficulty"],
-        "total_steps": step_num,
-        "final_score": final_score,
-        "model": MODEL_NAME,
-    }))
+    print(
+        f"[END] task={task_id} score={final_score}"
+        f" steps={step_num} model={MODEL_NAME}"
+        f" difficulty={task_info['difficulty']}",
+        flush=True,
+    )
 
     return final_score
 
